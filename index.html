@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hidz | TTS</title>
+    <link rel="icon" type="image/png" href="https://www.gobox.my.id/file/IcHjU.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Syne:wght@700;800;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Outfit', sans-serif; }
+        
+        /* Aurora animated background */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 80% 60% at 15% 5%, rgba(139, 92, 246, 0.18) 0%, transparent 55%),
+                radial-gradient(ellipse 60% 50% at 85% 90%, rgba(6, 182, 212, 0.12) 0%, transparent 55%),
+                radial-gradient(ellipse 50% 40% at 50% 50%, rgba(244, 114, 182, 0.07) 0%, transparent 55%);
+            pointer-events: none;
+            z-index: 0;
+            animation: aurora-shift 12s ease-in-out infinite alternate;
+        }
+
+        @keyframes aurora-shift {
+            0% { opacity: 0.7; transform: scale(1); }
+            100% { opacity: 1; transform: scale(1.05); }
+        }
+
+        /* Grid noise overlay */
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: 
+                linear-gradient(rgba(139,92,246,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(139,92,246,0.03) 1px, transparent 1px);
+            background-size: 32px 32px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .loader {
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(139, 92, 246, 0.3);
+            border-radius: 50%;
+            border-top-color: #a78bfa;
+            animation: spin 0.8s linear infinite;
+            box-shadow: 0 0 12px rgba(139,92,246,0.4);
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(139,92,246,0.4); border-radius: 4px; }
+
+        /* Glassmorphism card */
+        .glass-card {
+            background: rgba(18, 10, 35, 0.75);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            box-shadow:
+                0 0 0 1px rgba(139,92,246,0.08),
+                0 25px 60px rgba(0,0,0,0.6),
+                inset 0 1px 0 rgba(255,255,255,0.05);
+        }
+
+        /* Neon glow on inputs focus */
+        textarea:focus, select:focus {
+            box-shadow: 0 0 0 3px rgba(139,92,246,0.2), 0 0 20px rgba(139,92,246,0.15) !important;
+        }
+
+        /* Button gradient glow */
+        #generate-btn {
+            background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 40%, #4f46e5 100%);
+            box-shadow: 0 4px 20px rgba(124,58,237,0.4), 0 0 40px rgba(99,102,241,0.2);
+            transition: all 0.2s cubic-bezier(0.22,1,0.36,1);
+        }
+        #generate-btn:hover {
+            box-shadow: 0 6px 30px rgba(124,58,237,0.6), 0 0 60px rgba(99,102,241,0.3);
+            transform: translateY(-1px);
+        }
+        #generate-btn:active { transform: translateY(1px) scale(0.98); }
+        #generate-btn:disabled { opacity: 0.5; transform: none; }
+
+        /* Audio player dark */
+        audio {
+            filter: invert(1) hue-rotate(200deg) brightness(0.85) saturate(1.5);
+        }
+
+        /* Float watermark glow */
+        .wm-text {
+            background: linear-gradient(135deg, #7c3aed, #06b6d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
+</head>
+<body class="bg-[#08060f] text-white min-h-screen py-12 px-4 md:px-0 relative overflow-x-hidden">
+
+    <main class="max-w-xl mx-auto relative z-10">
+        <!-- Header -->
+        <div class="text-center mb-10">
+            <div class="flex items-center justify-center gap-3 mb-4">
+                <div class="w-9 h-9 rounded-xl overflow-hidden ring-2 ring-violet-500/40 shadow-[0_0_20px_rgba(139,92,246,0.4)]">
+                    <img src="https://www.gobox.my.id/file/IcHjU.png" class="w-full h-full object-cover" alt="icon">
+                </div>
+                <h1 class="text-3xl md:text-4xl font-black tracking-tight" style="font-family:'Syne',sans-serif; background:linear-gradient(135deg,#a78bfa,#38bdf8,#f472b6); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">
+                    Hidz TTS
+                </h1>
+            </div>
+            <p class="text-violet-300/70 text-sm md:text-base font-medium">Ubah teks jadi suara karakter anime &amp; tokoh terkenal</p>
+        </div>
+
+        <!-- Main Card -->
+        <div class="glass-card rounded-3xl p-6 md:p-8">
+            
+            <!-- Input Text -->
+            <div class="mb-5">
+                <label for="text-input" class="block text-xs font-bold text-violet-300 mb-2 uppercase tracking-widest">Masukkan Teks</label>
+                <textarea id="text-input" rows="4" 
+                    class="w-full rounded-2xl border border-violet-500/20 bg-white/[0.04] px-4 py-3 focus:outline-none focus:border-violet-500/50 transition-all resize-none font-medium text-white/90 placeholder:text-white/20 text-sm"
+                    placeholder="Contoh: Halooo, kamu siapa?"></textarea>
+            </div>
+
+            <!-- Select Model -->
+            <div class="mb-8">
+                <label for="model-select" class="block text-xs font-bold text-violet-300 mb-2 uppercase tracking-widest">Pilih Suara Karakter</label>
+                <div class="relative">
+                    <select id="model-select" class="w-full appearance-none rounded-2xl border border-violet-500/20 bg-white/[0.04] px-4 py-3.5 focus:outline-none focus:border-violet-500/50 cursor-pointer font-bold text-white/90 transition-all text-sm" style="background-color:rgba(255,255,255,0.04)">
+                        <!-- Options generated by JS -->
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-5 text-violet-400">
+                        <i class="fa-solid fa-chevron-down text-sm"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Generate Button -->
+            <button id="generate-btn" 
+                class="w-full text-white font-bold py-4 px-4 rounded-2xl flex justify-center items-center gap-2 text-base">
+                <i class="fa-solid fa-microphone-lines"></i> Generate Audio
+            </button>
+
+            <!-- Status Indicator -->
+            <div id="status-container" class="hidden mt-6 text-center text-sm font-bold">
+                <!-- Loading -->
+                <div id="loading-state" class="hidden flex justify-center items-center gap-3 text-violet-300 bg-violet-500/10 py-3 rounded-2xl border border-violet-500/20">
+                    <i class="fa-solid fa-circle-notch fa-spin text-lg text-violet-400"></i>
+                    <span>Sedang memproses suara...</span>
+                </div>
+                
+                <!-- Error -->
+                <div id="error-state" class="hidden text-red-400 bg-red-500/10 p-4 rounded-2xl border border-red-500/20 text-left">
+                    <p class="font-extrabold mb-1 text-red-300"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Gagal Memproses</p>
+                    <p id="error-text" class="font-medium opacity-80 text-sm"></p>
+                </div>
+            </div>
+
+            <!-- Result Section -->
+            <div id="result-section" class="hidden mt-8 pt-6 border-t border-violet-500/10">
+                <div class="flex items-center gap-2 mb-4 text-emerald-400 font-extrabold text-sm">
+                    <i class="fa-solid fa-circle-check text-lg text-emerald-400"></i> <span id="success-label">Berhasil di-generate!</span>
+                </div>
+                
+                <div class="bg-white/[0.04] rounded-2xl p-4 border border-violet-500/15">
+                    <audio id="audio-player" controls class="w-full h-12 outline-none mb-4"></audio>
+                    
+                    <a id="download-btn" href="#" target="_blank" 
+                        class="flex justify-center items-center gap-2 w-full bg-white/[0.06] hover:bg-violet-500/15 text-white/80 border border-violet-500/20 py-3 rounded-xl text-sm font-bold transition-all">
+                        <i class="fa-solid fa-download text-violet-400"></i> Download / Buka Audio Asli
+                    </a>
+                </div>
+            </div>
+
+        </div>
+        
+        <!-- Watermark Bottom -->
+        <div class="text-center mt-8 space-y-1">
+            <p class="text-xs text-white/20 font-semibold uppercase tracking-widest">
+                Powered by Hidz Forum
+            </p>
+            <p class="text-sm text-white/30 font-bold">
+                &copy; 2026 Hidz Forum
+            </p>
+        </div>
+    </main>
+
+    <!-- Floating Watermark -->
+    <div class="fixed bottom-4 right-4 md:bottom-6 md:right-6 pointer-events-none opacity-10 z-0">
+        <h1 class="text-4xl md:text-6xl font-extrabold wm-text tracking-tighter transform -rotate-12" style="font-family:'Syne',sans-serif">Hidz</h1>
+    </div>
+
+    <script>
+        // Data Model (Sesuai dengan API, Miku sudah dihapus)
+        const availableModels = [
+            { id: "nahida", name: "Nahida", icon: "🍀 " },
+            { id: "nami", name: "Nami", icon: "🍊 " },
+            { id: "ana", name: "Ana", icon: "👩🏼 " },
+            { id: "optimus_prime", name: "Optimus Prime", icon: "🤖 " },
+            { id: "goku", name: "Goku", icon: "🔥 " },
+            { id: "taylor_swift", name: "Taylor Swift", icon: "🎤 " },
+            { id: "elon_musk", name: "Elon Musk", icon: "🚀 " },
+            { id: "mickey_mouse", name: "Mickey Mouse", icon: "🐭 " },
+            { id: "kendrick_lamar", name: "Kendrick Lamar", icon: "🎧 " },
+            { id: "angela_adkinsh", name: "Angela Adkinsh", icon: "👱🏻‍♀️ " },
+            { id: "eminem", name: "Eminem", icon: "🎤 " }
+        ];
+
+        // Elemen DOM
+        const textInput = document.getElementById('text-input');
+        const modelSelect = document.getElementById('model-select');
+        const generateBtn = document.getElementById('generate-btn');
+        const statusContainer = document.getElementById('status-container');
+        const loadingState = document.getElementById('loading-state');
+        const errorState = document.getElementById('error-state');
+        const errorText = document.getElementById('error-text');
+        const resultSection = document.getElementById('result-section');
+        const audioPlayer = document.getElementById('audio-player');
+        const downloadBtn = document.getElementById('download-btn');
+        const successLabel = document.getElementById('success-label');
+
+        // Render Options
+        availableModels.forEach(model => {
+            const option = document.createElement('option');
+            option.value = model.id;
+            option.textContent = model.icon + model.name;
+            modelSelect.appendChild(option);
+        });
+
+        generateBtn.addEventListener('click', async () => {
+            const text = textInput.value.trim();
+            const modelId = modelSelect.value;
+
+            if (!text) {
+                alert("Masukkan teks terlebih dahulu!");
+                textInput.focus();
+                return;
+            }
+
+            // UI Loading State
+            statusContainer.classList.remove('hidden');
+            loadingState.classList.remove('hidden');
+            errorState.classList.add('hidden');
+            resultSection.classList.add('hidden');
+            generateBtn.disabled = true;
+            generateBtn.innerHTML = '<div class="loader"></div>';
+
+            // URL API — Angela Adkinsh pakai API baru, model lain tetap API lama
+            const isAngela = modelId === 'angela_adkinsh';
+            const apiUrl = isAngela
+                ? `https://api-nanzz.my.id/docs/api/ai/text-to-speech.php?text=${encodeURIComponent(text)}`
+                : `https://api.danzy.web.id/api/ai/tts?text=${encodeURIComponent(text)}&model=${encodeURIComponent(modelId)}`;
+
+            try {
+                // Fetch API menggunakan metode standar
+                const response = await fetch(apiUrl);
+                
+                if (!response.ok) {
+                    throw new Error(`Server Error: ${response.status}`);
+                }
+
+                // Parsing respons JSON
+                const data = await response.json();
+
+                let audioUrl, voiceName;
+
+                if (isAngela) {
+                    // API baru: result adalah array, cari entry Angela Adkinsh
+                    if (!data.status || !Array.isArray(data.result)) {
+                        throw new Error(data.message || "Gagal mendapatkan respons dari server.");
+                    }
+                    // Cari entry Angela di dalam array result
+                    const angelaEntry = data.result.find(item =>
+                        item.modelName === 'angela_adkinsh' || item.angela_adkinsh
+                    );
+                    if (!angelaEntry) {
+                        throw new Error("Data suara Angela Adkinsh tidak ditemukan dalam respons API.");
+                    }
+                    // Jika API mengembalikan error untuk Angela
+                    if (angelaEntry.error) {
+                        throw new Error(angelaEntry.error);
+                    }
+                    audioUrl = angelaEntry.angela_adkinsh;
+                    voiceName = angelaEntry.voice_name || "Angela Adkinsh";
+                    if (!audioUrl) {
+                        throw new Error("URL audio Angela Adkinsh tidak ditemukan.");
+                    }
+                } else {
+                    // Cek apakah API membalas status: true (model lainnya)
+                    if (data.status === true && data.result && data.result.audio_url) {
+                        audioUrl = data.result.audio_url;
+                        voiceName = data.result.voice_name;
+                    } else {
+                        throw new Error(data.message || "Gagal mendapatkan audio dari server Hidz.");
+                    }
+                }
+
+                    // Tampilkan Hasil
+                    loadingState.classList.add('hidden');
+                    resultSection.classList.remove('hidden');
+                    
+                    successLabel.textContent = `Suara ${voiceName} siap!`;
+                    
+                    // Set Audio SRC
+                    audioPlayer.src = audioUrl;
+                    downloadBtn.href = audioUrl;
+                    
+                    audioPlayer.play().catch(() => console.log("Autoplay dicegah browser."));
+
+            } catch (error) {
+                console.error("Terjadi kesalahan:", error);
+                loadingState.classList.add('hidden');
+                errorState.classList.remove('hidden');
+                
+                // Menangani error fetch
+                if (error.name === 'TypeError' || error.message === 'Failed to fetch') {
+                    errorText.textContent = "Koneksi terputus atau diblokir oleh sistem. Pastikan kamu memiliki koneksi internet yang stabil.";
+                } else {
+                    errorText.textContent = error.message;
+                }
+            } finally {
+                // Kembalikan tombol seperti semula
+                generateBtn.disabled = false;
+                generateBtn.innerHTML = '<i class="fa-solid fa-microphone-lines"></i> Generate Audio';
+            }
+        });
+    </script>
+</body>
+</html>
