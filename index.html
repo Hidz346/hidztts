@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hidz | TTS</title>
+    <link rel="icon" type="image/png" href="https://www.gobox.my.id/file/IcHjU.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Syne:wght@700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* ========================================================
+           DESIGN TOKENS — Neobrutalism x Y2K
+           Border = struktur (var(--ink)), Shadow = energi (neon)
+           ======================================================== */
+        :root {
+            --bg: #0a0512;
+            --grid-line: rgba(255,255,255,0.05);
+            --blob-a: rgba(255, 62, 196, 0.16);
+            --blob-b: rgba(34, 228, 255, 0.12);
+            --surface: #171022;
+            --surface-alt: #1e1730;
+            --ink: #f5f0ff;
+            --text: #f5f0ff;
+            --text-soft: rgba(245,240,255,0.55);
+            --pink: #ff3ec4;
+            --cyan: #22e4ff;
+            --yellow: #ffe93d;
+            --lime: #4dff9e;
+            --red: #ff5c5c;
+        }
+        [data-theme="light"] {
+            --bg: #f1ecff;
+            --grid-line: rgba(10,10,10,0.07);
+            --blob-a: rgba(255, 46, 154, 0.14);
+            --blob-b: rgba(0, 194, 255, 0.14);
+            --surface: #ffffff;
+            --surface-alt: #f6f2ff;
+            --ink: #0a0a0a;
+            --text: #0a0a0a;
+            --text-soft: rgba(10,10,10,0.55);
+            --pink: #ff2e9a;
+            --cyan: #00b6e6;
+            --yellow: #ffd400;
+            --lime: #14b872;
+            --red: #e0263c;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg);
+            background-image: radial-gradient(var(--grid-line) 1.5px, transparent 1.5px);
+            background-size: 22px 22px;
+            color: var(--text);
+            transition: background-color .25s ease, color .25s ease;
+        }
+
+        /* Ambient Y2K color blobs */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 70% 55% at 12% 8%, var(--blob-a) 0%, transparent 55%),
+                radial-gradient(ellipse 55% 45% at 88% 92%, var(--blob-b) 0%, transparent 55%);
+            pointer-events: none;
+            z-index: 0;
+            animation: blob-shift 12s ease-in-out infinite alternate;
+        }
+        @keyframes blob-shift {
+            0% { opacity: .75; transform: scale(1); }
+            100% { opacity: 1; transform: scale(1.06); }
+        }
+
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--pink); border-radius: 4px; }
+
+        /* ---------- Sparkle decorations ---------- */
+        .sparkle {
+            display: inline-block;
+            color: var(--yellow);
+            animation: twinkle 2.4s ease-in-out infinite;
+        }
+        .sparkle.delay { animation-delay: 1.1s; color: var(--cyan); }
+        @keyframes twinkle {
+            0%, 100% { transform: scale(1) rotate(0deg); opacity: .6; }
+            50% { transform: scale(1.3) rotate(20deg); opacity: 1; }
+        }
+
+        /* ---------- Brand title (chrome / holographic) ---------- */
+        .brand-title {
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            background: linear-gradient(100deg, var(--pink) 0%, var(--cyan) 45%, var(--yellow) 90%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .logo-badge {
+            border: 3px solid var(--ink);
+            border-radius: 12px;
+            box-shadow: 4px 4px 0 0 var(--pink);
+            overflow: hidden;
+        }
+
+        /* ---------- Brutalist surfaces ---------- */
+        .main-card {
+            background: var(--surface);
+            border: 3px solid var(--ink);
+            box-shadow: 8px 8px 0 0 var(--pink);
+        }
+
+        .field-label {
+            font-family: 'Space Mono', monospace;
+            text-transform: uppercase;
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            color: var(--cyan);
+            display: block;
+            margin-bottom: 0.55rem;
+        }
+        .field-label::before { content: "// "; color: var(--text-soft); }
+
+        .input-brutal {
+            width: 100%;
+            border: 3px solid var(--ink);
+            border-radius: 14px;
+            background: var(--surface-alt);
+            color: var(--text);
+            font-weight: 600;
+            box-shadow: 4px 4px 0 0 var(--cyan);
+            transition: box-shadow .15s ease, transform .15s ease, border-color .15s ease;
+        }
+        .input-brutal::placeholder { color: var(--text-soft); }
+        .input-brutal:focus {
+            outline: none;
+            box-shadow: 6px 6px 0 0 var(--cyan);
+            transform: translate(-2px, -2px);
+        }
+        select.input-brutal { cursor: pointer; }
+
+        /* ---------- Buttons ---------- */
+        .btn-brutal {
+            border: 3px solid var(--ink);
+            border-radius: 14px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            color: #0a0a0a;
+            transition: transform .12s cubic-bezier(.22,1,.36,1), box-shadow .12s cubic-bezier(.22,1,.36,1);
+            cursor: pointer;
+        }
+        .btn-pink { background: var(--pink); box-shadow: 6px 6px 0 0 var(--ink); }
+        .btn-pink:hover:not(:disabled) { transform: translate(-2px, -2px); box-shadow: 8px 8px 0 0 var(--ink); }
+        .btn-pink:active:not(:disabled) { transform: translate(4px, 4px); box-shadow: 0 0 0 0 var(--ink); }
+        .btn-pink:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+
+        .btn-cyan { background: var(--cyan); box-shadow: 5px 5px 0 0 var(--ink); }
+        .btn-cyan:hover { transform: translate(-2px, -2px); box-shadow: 7px 7px 0 0 var(--ink); }
+        .btn-cyan:active { transform: translate(3px, 3px); box-shadow: 0 0 0 0 var(--ink); }
+
+        /* ---------- Status blocks ---------- */
+        .status-block {
+            border: 3px solid var(--ink);
+            border-radius: 14px;
+            font-weight: 700;
+        }
+        .status-yellow { background: var(--yellow); color: #0a0a0a; box-shadow: 5px 5px 0 0 var(--ink); }
+        .status-red { background: var(--surface-alt); color: var(--red); box-shadow: 5px 5px 0 0 var(--red); }
+        .status-lime-tag { color: var(--lime); }
+
+        .result-box {
+            background: var(--surface-alt);
+            border: 3px solid var(--ink);
+            border-radius: 14px;
+            box-shadow: 6px 6px 0 0 var(--lime);
+        }
+
+        .loader {
+            width: 20px; height: 20px;
+            border: 3px solid rgba(0,0,0,0.25);
+            border-radius: 50%;
+            border-top-color: #0a0a0a;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        audio { border-radius: 10px; width: 100%; }
+        :root:not([data-theme="light"]) audio {
+            filter: invert(1) hue-rotate(200deg) brightness(0.85) saturate(1.5);
+        }
+
+        /* ---------- Theme toggle ---------- */
+        .theme-toggle-btn {
+            width: 52px; height: 52px;
+            border: 3px solid var(--ink);
+            border-radius: 50%;
+            background: var(--surface);
+            color: var(--text);
+            box-shadow: 4px 4px 0 0 var(--yellow);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: transform .12s cubic-bezier(.22,1,.36,1), box-shadow .12s cubic-bezier(.22,1,.36,1);
+        }
+        .theme-toggle-btn:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 0 var(--yellow); }
+        .theme-toggle-btn:active { transform: translate(3px, 3px); box-shadow: 0 0 0 0 var(--yellow); }
+
+        /* ---------- Watermark ---------- */
+        .wm-text {
+            background: linear-gradient(120deg, var(--pink), var(--cyan), var(--yellow));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .footer-tag {
+            font-family: 'Space Mono', monospace;
+            letter-spacing: 0.1em;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .sparkle, body::before, .loader { animation: none !important; }
+        }
+    </style>
+</head>
+<body class="min-h-screen py-12 px-4 md:px-0 relative overflow-x-hidden">
+
+    <!-- Dark / Light Toggle -->
+    <button id="theme-toggle" type="button" aria-label="Ganti tema terang/gelap" class="theme-toggle-btn fixed top-5 right-5 z-50">
+        <i id="theme-icon" class="fa-solid fa-moon"></i>
+    </button>
+
+    <main class="max-w-xl mx-auto relative z-10">
+        <!-- Header -->
+        <div class="text-center mb-10">
+            <div class="flex items-center justify-center gap-3 mb-4">
+                <div class="w-9 h-9 logo-badge">
+                    <img src="https://www.gobox.my.id/file/IcHjU.png" class="w-full h-full object-cover" alt="icon">
+                </div>
+                <h1 class="text-3xl md:text-4xl brand-title">
+                    <span class="sparkle">✦</span> Hidz TTS <span class="sparkle delay">✧</span>
+                </h1>
+            </div>
+            <p class="text-sm md:text-base font-medium" style="color:var(--text-soft)">Ubah teks jadi suara karakter anime &amp; tokoh terkenal</p>
+        </div>
+
+        <!-- Main Card -->
+        <div class="main-card rounded-3xl p-6 md:p-8">
+
+            <!-- Input Text -->
+            <div class="mb-5">
+                <label for="text-input" class="field-label">Masukkan Teks</label>
+                <textarea id="text-input" rows="4"
+                    class="input-brutal px-4 py-3 resize-none text-sm"
+                    placeholder="Contoh: Halooo, kamu siapa?"></textarea>
+            </div>
+
+            <!-- Select Model -->
+            <div class="mb-8">
+                <label for="model-select" class="field-label">Pilih Suara Karakter</label>
+                <div class="relative">
+                    <select id="model-select" class="input-brutal w-full appearance-none px-4 py-3.5 font-bold text-sm">
+                        <!-- Options generated by JS -->
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-5" style="color:var(--pink)">
+                        <i class="fa-solid fa-chevron-down text-sm"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Generate Button -->
+            <button id="generate-btn"
+                class="btn-brutal btn-pink w-full py-4 px-4 flex justify-center items-center gap-2 text-base">
+                <i class="fa-solid fa-microphone-lines"></i> Generate Audio
+            </button>
+
+            <!-- Status Indicator -->
+            <div id="status-container" class="hidden mt-6 text-center text-sm font-bold">
+                <!-- Loading -->
+                <div id="loading-state" class="hidden status-block status-yellow flex justify-center items-center gap-3 py-3">
+                    <i class="fa-solid fa-circle-notch fa-spin text-lg"></i>
+                    <span>Sedang memproses suara...</span>
+                </div>
+
+                <!-- Error -->
+                <div id="error-state" class="hidden status-block status-red p-4 text-left">
+                    <p class="font-extrabold mb-1"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Gagal Memproses</p>
+                    <p id="error-text" class="font-medium opacity-80 text-sm"></p>
+                </div>
+            </div>
+
+            <!-- Result Section -->
+            <div id="result-section" class="hidden mt-8 pt-6" style="border-top:3px solid var(--ink)">
+                <div class="flex items-center gap-2 mb-4 font-extrabold text-sm status-lime-tag">
+                    <i class="fa-solid fa-circle-check text-lg"></i> <span id="success-label">Berhasil di-generate!</span>
+                </div>
+
+                <div class="result-box p-4">
+                    <audio id="audio-player" controls class="h-12 outline-none mb-4"></audio>
+
+                    <a id="download-btn" href="#" target="_blank"
+                        class="btn-brutal btn-cyan flex justify-center items-center gap-2 w-full py-3 text-sm">
+                        <i class="fa-solid fa-download"></i> Download / Buka Audio Asli
+                    </a>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Watermark Bottom -->
+        <div class="text-center mt-8 space-y-1">
+            <p class="footer-tag text-xs font-semibold uppercase" style="color:var(--text-soft)">
+                Powered by Hidz Forum
+            </p>
+            <p class="footer-tag text-sm font-bold" style="color:var(--text-soft)">
+                &copy; 2026 Hidz Forum
+            </p>
+        </div>
+    </main>
+
+    <!-- Floating Watermark -->
+    <div class="fixed bottom-4 right-4 md:bottom-6 md:right-6 pointer-events-none opacity-10 z-0">
+        <h1 class="text-4xl md:text-6xl font-extrabold wm-text tracking-tighter transform -rotate-12" style="font-family:'Syne',sans-serif">Hidz</h1>
+    </div>
+
+    <script>
+        // Data Model (Sesuai dengan API, Miku sudah dihapus)
+        const availableModels = [
+            { id: "nahida", name: "Nahida", icon: "🍀 " },
+            { id: "nami", name: "Nami", icon: "🍊 " },
+            { id: "ana", name: "Ana", icon: "👩🏼 " },
+            { id: "optimus_prime", name: "Optimus Prime", icon: "🤖 " },
+            { id: "goku", name: "Goku", icon: "🔥 " },
+            { id: "taylor_swift", name: "Taylor Swift", icon: "🎤 " },
+            { id: "elon_musk", name: "Elon Musk", icon: "🚀 " },
+            { id: "mickey_mouse", name: "Mickey Mouse", icon: "🐭 " },
+            { id: "kendrick_lamar", name: "Kendrick Lamar", icon: "🎧 " },
+            { id: "angela_adkinsh", name: "Angela Adkinsh", icon: "👱🏻‍♀️ " },
+            { id: "eminem", name: "Eminem", icon: "🎤 " }
+        ];
+
+        // Elemen DOM
+        const textInput = document.getElementById('text-input');
+        const modelSelect = document.getElementById('model-select');
+        const generateBtn = document.getElementById('generate-btn');
+        const statusContainer = document.getElementById('status-container');
+        const loadingState = document.getElementById('loading-state');
+        const errorState = document.getElementById('error-state');
+        const errorText = document.getElementById('error-text');
+        const resultSection = document.getElementById('result-section');
+        const audioPlayer = document.getElementById('audio-player');
+        const downloadBtn = document.getElementById('download-btn');
+        const successLabel = document.getElementById('success-label');
+
+        // Render Options
+        availableModels.forEach(model => {
+            const option = document.createElement('option');
+            option.value = model.id;
+            option.textContent = model.icon + model.name;
+            modelSelect.appendChild(option);
+        });
+
+        generateBtn.addEventListener('click', async () => {
+            const text = textInput.value.trim();
+            const modelId = modelSelect.value;
+
+            if (!text) {
+                alert("Masukkan teks terlebih dahulu!");
+                textInput.focus();
+                return;
+            }
+
+            // UI Loading State
+            statusContainer.classList.remove('hidden');
+            loadingState.classList.remove('hidden');
+            errorState.classList.add('hidden');
+            resultSection.classList.add('hidden');
+            generateBtn.disabled = true;
+            generateBtn.innerHTML = '<div class="loader"></div>';
+
+            // URL API — satu endpoint Nanzz ini membalas SEMUA suara sekaligus
+            // dalam satu array "result", jadi cukup dipanggil sekali dengan "text"
+            // lalu kita cari entry yang cocok dengan model yang dipilih user.
+            const apiUrl = `https://api-nanzz.my.id/docs/api/ai/text-to-speech.php?text=${encodeURIComponent(text)}`;
+
+            try {
+                // Fetch API menggunakan metode standar
+                const response = await fetch(apiUrl);
+
+                if (!response.ok) {
+                    throw new Error(`Server Error: ${response.status}`);
+                }
+
+                // Parsing respons JSON
+                const data = await response.json();
+
+                if (!data.status || !Array.isArray(data.result)) {
+                    throw new Error(data.message || "Gagal mendapatkan respons dari server.");
+                }
+
+                // Cari entry sesuai model yang dipilih di dalam array result.
+                // Entry sukses punya key sesuai id model (mis. "nahida"),
+                // entry gagal cuma punya "modelName" + "error".
+                const modelEntry = data.result.find(item =>
+                    item.modelName === modelId || item[modelId]
+                );
+
+                if (!modelEntry) {
+                    throw new Error("Suara untuk karakter ini tidak ditemukan dalam respons API.");
+                }
+
+                // Jika API mengembalikan error untuk model ini
+                if (modelEntry.error) {
+                    throw new Error(modelEntry.error);
+                }
+
+                const audioUrl = modelEntry[modelId];
+                const voiceName = modelEntry.voice_name || modelId;
+
+                if (!audioUrl) {
+                    throw new Error("URL audio tidak ditemukan untuk karakter ini.");
+                }
+
+                // Tampilkan Hasil
+                loadingState.classList.add('hidden');
+                resultSection.classList.remove('hidden');
+
+                successLabel.textContent = `Suara ${voiceName} siap!`;
+
+                // Set Audio SRC
+                audioPlayer.src = audioUrl;
+                downloadBtn.href = audioUrl;
+
+                audioPlayer.play().catch(() => console.log("Autoplay dicegah browser."));
+
+            } catch (error) {
+                console.error("Terjadi kesalahan:", error);
+                loadingState.classList.add('hidden');
+                errorState.classList.remove('hidden');
+
+                // Menangani error fetch
+                if (error.name === 'TypeError' || error.message === 'Failed to fetch') {
+                    errorText.textContent = "Koneksi terputus atau diblokir oleh sistem. Pastikan kamu memiliki koneksi internet yang stabil.";
+                } else {
+                    errorText.textContent = error.message;
+                }
+            } finally {
+                // Kembalikan tombol seperti semula
+                generateBtn.disabled = false;
+                generateBtn.innerHTML = '<i class="fa-solid fa-microphone-lines"></i> Generate Audio';
+            }
+        });
+    </script>
+
+    <!-- Theme Toggle Script (terpisah, tidak menyentuh logika TTS di atas) -->
+    <script>
+        (function () {
+            const root = document.documentElement;
+            const toggleBtn = document.getElementById('theme-toggle');
+            const themeIcon = document.getElementById('theme-icon');
+
+            toggleBtn.addEventListener('click', () => {
+                const isLight = root.getAttribute('data-theme') === 'light';
+                if (isLight) {
+                    root.removeAttribute('data-theme');
+                    themeIcon.classList.remove('fa-sun');
+                    themeIcon.classList.add('fa-moon');
+                } else {
+                    root.setAttribute('data-theme', 'light');
+                    themeIcon.classList.remove('fa-moon');
+                    themeIcon.classList.add('fa-sun');
+                }
+            });
+        })();
+    </script>
+</body>
+</html>
